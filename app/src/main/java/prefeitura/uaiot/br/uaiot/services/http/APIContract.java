@@ -19,4 +19,7 @@ public interface APIContract {
 
     @GET("/serv/log?")
     Call<List<LogAsset>> getThingPosition(@Query("thingImei")int thingImei);
+
+    @GET("/serv/log")
+    Call<List<LogAsset>> getAssetsPosition();
 }

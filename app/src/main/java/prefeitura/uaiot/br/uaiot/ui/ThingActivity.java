@@ -19,14 +19,10 @@ import prefeitura.uaiot.br.uaiot.R;
 import prefeitura.uaiot.br.uaiot.helpers.ConnectionNet;
 import prefeitura.uaiot.br.uaiot.models.LogAsset;
 import prefeitura.uaiot.br.uaiot.models.Thing;
-import prefeitura.uaiot.br.uaiot.services.http.APIClient;
-import prefeitura.uaiot.br.uaiot.services.http.APIContract;
+import prefeitura.uaiot.br.uaiot.sync.GetLogAsync;
 import prefeitura.uaiot.br.uaiot.sync.GetThingAsync;
 import prefeitura.uaiot.br.uaiot.ui.adapters.RecyclerTouchListener;
 import prefeitura.uaiot.br.uaiot.ui.adapters.ThingAdapter;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ThingActivity extends AppCompatActivity {
 
@@ -42,6 +38,7 @@ public class ThingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thing);
 
+        getSupportActionBar().setTitle("Localização");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         pgbLoading = findViewById(R.id.txtLoading1);
@@ -58,8 +55,6 @@ public class ThingActivity extends AppCompatActivity {
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-
-                visibilityLoading(View.VISIBLE);
 
                 Thing thing = thingAdapter.getList().get(position);
 
@@ -78,27 +73,7 @@ public class ThingActivity extends AppCompatActivity {
         try {
             if (ConnectionNet.hasConnection(this)) {
 
-                APIContract apiContract = APIClient.getClient().create(APIContract.class);
-                Call<List<LogAsset>> call = apiContract.getThingPosition(thing.getId());
-
-                call.enqueue(new Callback<List<LogAsset>>() {
-                    @Override
-                    public void onResponse(Call<List<LogAsset>> call, Response<List<LogAsset>> response) {
-
-                        List<LogAsset> logAsset = response.body();
-
-                        Intent intent = new Intent(ThingActivity.this, MapActivity.class);
-                        intent.putExtra("LAT", logAsset.get(0).getLatitude());
-                        intent.putExtra("LNG", logAsset.get(0).getLongitude());
-
-                        startActivity(intent);
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<LogAsset>> call, Throwable t) {
-
-                    }
-                });
+                new GetLogAsync(ThingActivity.this, logListener, thing.getId()).execute();
 
             } else {
                 Snackbar.make(findViewById(R.id.coordinatorThingActivity),
@@ -148,7 +123,24 @@ public class ThingActivity extends AppCompatActivity {
         }
     };
 
-    @Override
+    GetLogAsync.onLogListener logListener = new GetLogAsync.onLogListener() {
+        @Override
+        public void onCompleted(List<LogAsset> logAsset) {
+
+            if(logAsset != null && logAsset.size() > 0) {
+                Intent intent = new Intent(ThingActivity.this, MapActivity.class);
+                intent.putExtra("LAT", logAsset.get(0).getLatitude());
+                intent.putExtra("LNG", logAsset.get(0).getLongitude());
+                intent.putExtra("NAME", logAsset.get(0).getThing().getDescription());
+
+                startActivity(intent);
+            } else {
+                Snackbar.make(findViewById(R.id.coordinatorThingActivity),
+                        "Não foi possível localizar o veículo.", Snackbar.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.action_update_thing_list) {

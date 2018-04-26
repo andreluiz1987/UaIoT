@@ -92,10 +92,9 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.nav_find) {
             startActivity(new Intent(this, ThingActivity.class));
             return false;
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_share) {
-
+        } else if (id == R.id.nav_info) {
+            startActivity(new Intent(this, AboutActivity.class));
+            return false;
         }
 
         if (frag != null) {

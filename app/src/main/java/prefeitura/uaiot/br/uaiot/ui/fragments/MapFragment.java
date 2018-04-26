@@ -12,13 +12,29 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import prefeitura.uaiot.br.uaiot.R;
+import prefeitura.uaiot.br.uaiot.helpers.VectorHelpers;
+import prefeitura.uaiot.br.uaiot.models.LogAsset;
+import prefeitura.uaiot.br.uaiot.services.http.APIClient;
+import prefeitura.uaiot.br.uaiot.services.http.APIContract;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
+
+    private int delay = 2000;   // delay de 5 seg.
+    private int interval = 10000;  // intervalo de 1 seg.
+    private Timer timer = new Timer();
 
     private GoogleMap mMap;
 
@@ -33,7 +49,55 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
 
+        timer.scheduleAtFixedRate(new TimerTask() {
+            public void run() {
+                getLogAssets();
+            }
+        }, delay, interval);
+
         return view;
+    }
+
+    private void getLogAssets() {
+
+        APIContract apiContract = APIClient.getClient().create(APIContract.class);
+        Call<List<LogAsset>> call = apiContract.getAssetsPosition();
+
+        call.enqueue(new Callback<List<LogAsset>>() {
+            @Override
+            public void onResponse(Call<List<LogAsset>> call, Response<List<LogAsset>> response) {
+                List<LogAsset> logAssets = response.body();
+
+                drawMarkerInMap(logAssets);
+            }
+
+            @Override
+            public void onFailure(Call<List<LogAsset>> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void drawMarkerInMap(List<LogAsset> logAssets) {
+
+        if (mMap == null)
+            return;
+
+        try {
+
+            mMap.clear();
+
+            for (int i = 0; i < logAssets.size(); i++) {
+
+                LatLng latLng = new LatLng(logAssets.get(i).getLatitude(), logAssets.get(i).getLongitude());
+                mMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title(logAssets.get(i).getThing().getDescription())
+                        .icon(VectorHelpers.bitmapDescriptorFromVector(getActivity(), R.drawable.ic_marker_car)));
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**

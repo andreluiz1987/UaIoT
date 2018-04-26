@@ -35,6 +35,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         LatLng latLng = new LatLng(intent.getFloatExtra("LAT", 0), intent.getFloatExtra("LNG", 0));
         mMap.addMarker(new MarkerOptions()
                 .position(latLng)
+                .title(intent.getStringExtra("NAME"))
                 .icon(VectorHelpers.bitmapDescriptorFromVector(this, R.drawable.ic_marker_car)));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f));

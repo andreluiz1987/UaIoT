@@ -13,10 +13,6 @@
             android:icon="@drawable/ic_menu_find"
             android:title="Localizar" />
         <item
-            android:id="@+id/nav_share"
-            android:icon="@drawable/ic_menu_share"
-            android:title="Compartilhar" />
-        <item
             android:id="@+id/nav_info"
             android:icon="@drawable/ic_menu_about"
             android:title="Sobre" />
