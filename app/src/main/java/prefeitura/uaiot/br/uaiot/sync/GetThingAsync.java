@@ -40,6 +40,7 @@ public class GetThingAsync extends AsyncTask<Void, Void, List<Thing>> {
 
         builder = new AlertDialog.Builder(context);
         builder.setView(R.layout.progress_layout);
+        builder.setCancelable(true);
         alertDialog = builder.create();
         alertDialog.show();
     }

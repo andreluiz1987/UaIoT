@@ -42,6 +42,7 @@ public class GetLogAsync extends AsyncTask<Void, Void, List<LogAsset>> {
 
         builder = new AlertDialog.Builder(context);
         builder.setView(R.layout.progress_layout);
+        builder.setCancelable(true);
         alertDialog = builder.create();
         alertDialog.show();
     }

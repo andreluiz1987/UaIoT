@@ -2,6 +2,7 @@ package prefeitura.uaiot.br.uaiot.services.http;
 
 import java.util.List;
 
+import prefeitura.uaiot.br.uaiot.models.Alarm;
 import prefeitura.uaiot.br.uaiot.models.LogAsset;
 import prefeitura.uaiot.br.uaiot.models.Thing;
 import retrofit2.Call;
@@ -22,4 +23,7 @@ public interface APIContract {
 
     @GET("/serv/log")
     Call<List<LogAsset>> getAssetsPosition();
+
+    @GET("/serv/alarm")
+    Call<List<Alarm>> getAlarms();
 }
